@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/
 import { FeedbackService } from './feedback.service';
 import { Feedback } from './entities/feedback.entity';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
-// import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 
-@ApiTags('Feedback')
+@ApiTags('Feedback - Bảng Ykienkhachhang')
 @Controller('feedback')
 export class FeedbackController {
   constructor(private readonly feedbackService: FeedbackService) {}
@@ -33,23 +33,39 @@ export class FeedbackController {
     return this.feedbackService.getAll();
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.feedbackService.findAll();
-  // }
+  @Get(':email')
+  async findCustomer(@Param('email') email: string) {
+    return this.feedbackService.findCustomer(email);
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.feedbackService.findOne(+id);
-  // }
+  @Patch(':maYKien')
+  async update(@Param('maYKien') maYKien: string, @Body() updateFeedbackDto: UpdateFeedbackDto, @Res() res: Response) {
+    if (!updateFeedbackDto) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const updateFeedback = await this.feedbackService.update(
+        maYKien, 
+        updateFeedbackDto,
+      );
+      res.status(200).json({ success: true, body: updateFeedback });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateFeedbackDto: UpdateFeedbackDto) {
-  //   return this.feedbackService.update(+id, updateFeedbackDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.feedbackService.remove(+id);
-  // }
+  @Delete(':maYKien')
+  async remove(@Param('maYKien') maYKien: string, @Res() res: Response) {
+    if (!maYKien) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteFeedback = await this.feedbackService.remove(maYKien);
+      res.status(200).json({ success: true, body: deleteFeedback });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }

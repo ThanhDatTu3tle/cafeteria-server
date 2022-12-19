@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/
 import { AddressService } from './address.service';
 import { Address } from './entities/address.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
-// import { UpdateAddressDto } from './dto/update-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 
-@ApiTags('Address')
+@ApiTags('Address - Bảng Danhsachdiachi')
 @Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
@@ -33,23 +33,39 @@ export class AddressController {
     return this.addressService.getAll();
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.productsService.findAll();
-  // }
+  @Get(':email')
+  async findCustomer(@Param('email') email: string) {
+    return this.addressService.findCustomer(email);
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.productsService.findOne(+id);
-  // }
+  @Patch(':maDiaChi')
+  async update(@Param('maDiaChi') maDiaChi: string, @Body() updateAddressDto: UpdateAddressDto, @Res() res: Response,) {
+    if (!updateAddressDto) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const updateCustomer = await this.addressService.update(
+        maDiaChi, 
+        updateAddressDto,
+      );
+      res.status(200).json({ success: true, body: updateCustomer });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-  //   return this.productsService.update(+id, updateProductDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.productsService.remove(+id);
-  // }
+  @Delete(':maDiaChi')
+  async remove(@Param('maDiaChi') maDiaChi: string, @Res() res: Response,) {
+    if (!maDiaChi) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteAddress = await this.addressService.remove(maDiaChi);
+      res.status(200).json({ success: true, body: deleteAddress });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }

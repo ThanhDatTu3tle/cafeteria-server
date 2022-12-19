@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-// import { UpdateFavoriteDto } from './dto/update-favorite.dto';
-import { FavoriteRelations as relations} from 'src/relations/relations';
+import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { FavoriteRelations as relations} from '../../src/relations/relations';
 import { Thucuongyeuthich as Favorite } from 'output/entities/Thucuongyeuthich';
 import { Thucuong as Product } from 'output/entities/Thucuong';
 import { Khachhang as Customer } from 'output/entities/Khachhang';
@@ -57,19 +57,66 @@ export class FavoriteService {
     }
   }
 
-  findAll() {
-    return `This action returns all favorite`;
+  async getAll(): Promise<Favorite[]> {
+    const getAll = await this.favoriteRepository.find({
+      relations,
+    })
+    
+    return getAll;
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} favorite`;
-  // }
+  async findCustomer(email: string) {
+    const customer = await this.favoriteRepository.find({ 
+      relations,
+    })
+    const favorite = await this.favoriteRepository.find();
 
-  // update(id: number, updateFavoriteDto: UpdateFavoriteDto) {
-  //   return `This action updates a #${id} favorite`;
-  // }
+    return customer;
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} favorite`;
-  // }
+  async findCustomerAndProduct(email: string, maMonAn: string) {
+    const customerProduct = await this.favoriteRepository.find({ 
+      relations,
+    })
+    const favorite = await this.favoriteRepository.find();
+
+    return customerProduct;
+  }
+
+  async update(maThucUongYeuThich: string, updateFavoriteDto: UpdateFavoriteDto) {
+    try {
+      const updateFavorite = await this.favoriteRepository.findOneByOrFail({ maThucUongYeuThich })
+
+      await this.favoriteRepository.save({
+        ...updateFavorite,
+        // gioDat: updateOrderDto.gioDat,
+        // ngayDat: updateOrderDto.ngayDat,
+        // thanhTien: updateOrderDto.thanhTien,
+        // maGiamGia: updateOrderDto.maGiamGia,
+        // trangThai: updateOrderDto.trangThai,
+      });
+
+      const findAndReturn = await this.favoriteRepository.findOneOrFail({
+        relations,
+        where: { 
+          maThucUongYeuThich: updateFavorite.maThucUongYeuThich,
+        },
+      });
+
+      return findAndReturn;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async remove(maThucUongYeuThich: string) {
+    try {
+      const findOne = await this.favoriteRepository.findOneOrFail({
+        where: { maThucUongYeuThich },
+      });
+      return await this.favoriteRepository.remove(findOne);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

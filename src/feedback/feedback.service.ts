@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
-// import { UpdateFeedbackDto } from './dto/update-feedback.dto';
-import { FeedbackRelations as relations } from 'src/relations/relations';
+import { UpdateFeedbackDto } from './dto/update-feedback.dto';
+import { FeedbackRelations as relations } from '../../src/relations/relations';
 import { Ykienkhachhang as Feedback } from 'output/entities/Ykienkhachhang';
 import { Khachhang as Customer } from 'output/entities/Khachhang';
 import { Repository, getManager } from 'typeorm';
@@ -53,19 +53,44 @@ export class FeedbackService {
     return getAll;
   }
 
-  // findAll() {
-  //   return `This action returns all products`;
-  // }
+  async findCustomer(email: string) {
+    const customer = await this.feedbackRepository.find({ 
+      relations,
+    })
+    const address = await this.feedbackRepository.find();
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} product`;
-  // }
+    return customer;
+  }
 
-  // update(id: number, updateProductDto: UpdateProductDto) {
-  //   return `This action updates a #${id} product`;
-  // }
+  async update(maYKien: string, updateFeedbackDto: UpdateFeedbackDto): Promise<Feedback> {
+    try {
+      const updateFeedback = await this.feedbackRepository.findOneByOrFail({ maYKien })
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} product`;
-  // }
+      await this.feedbackRepository.save({
+        ...updateFeedback,
+        noiDung: updateFeedbackDto.noiDung,
+        danhGia: updateFeedbackDto.danhGia,
+      });
+
+      const findAndReturn = await this.feedbackRepository.findOneOrFail({
+        relations,
+        where: { maYKien: updateFeedback.maYKien },
+      });
+
+      return findAndReturn;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async remove(maYKien: string) {
+    try {
+      const findOne = await this.feedbackRepository.findOneOrFail({
+        where: { maYKien },
+      });
+      return await this.feedbackRepository.remove(findOne);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

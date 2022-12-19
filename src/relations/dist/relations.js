@@ -6,20 +6,20 @@ var ProductRelations = [
 ];
 exports.ProductRelations = ProductRelations;
 var FeedbackRelations = [
-    'maKhachHang',
+    'email',
 ];
 exports.FeedbackRelations = FeedbackRelations;
 var AddressRelations = [
-    'maKhachHang',
+    'email',
 ];
 exports.AddressRelations = AddressRelations;
 var OrderRelations = [
-    'maKhachHang',
+    'email',
     'maDiaChi',
 ];
 exports.OrderRelations = OrderRelations;
 var FavoriteRelations = [
-    'maKhachHang',
+    'email',
     'maMonAn',
 ];
 exports.FavoriteRelations = FavoriteRelations;

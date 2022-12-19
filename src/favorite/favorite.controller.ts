@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/
 import { FavoriteService } from './favorite.service';
 import { Favorite } from './entities/favorite.entity';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-// import { UpdateFavoriteDto } from './dto/update-favorite.dto';
+import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 import { REPLCommand } from 'repl';
 
-@ApiTags('Favorite')
+@ApiTags('Favorite - Bảng Thucuongyeuthich')
 @Controller('favorite')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
@@ -30,22 +30,57 @@ export class FavoriteController {
   }
 
   @Get()
-  async findAll() {
-    return this.favoriteService.findAll();
+  async getAll() {
+    return this.favoriteService.getAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.favoriteService.findOne(+id);
-  // }
+  @Get(':email')
+  async findCustomer(
+    @Param('email') email: string,
+  ) {
+    return this.favoriteService.findCustomer(email);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateFavoriteDto: UpdateFavoriteDto) {
-  //   return this.favoriteService.update(+id, updateFavoriteDto);
-  // }
+  @Get(':email/:maMonAn')
+  async findCustomerAndProduct(
+    @Param('email') email: string,
+    @Param('maMonAn') maMonAn: string,
+  ) {
+    return this.favoriteService.findCustomerAndProduct(email, maMonAn);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.favoriteService.remove(+id);
-  // }
+  @Patch(':maMonAnYeuThich')
+  async update(
+    @Param('maMonAnYeuThich') maMonAnYeuThich: string, 
+    @Body() updateFavoriteDto: UpdateFavoriteDto,
+    @Res() res: Response,
+  ) {
+    if (!updateFavoriteDto) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const updateOrder = await this.favoriteService.update(
+        maMonAnYeuThich, 
+        updateFavoriteDto,
+      );
+      res.status(200).json({ success: true, body: updateOrder });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
+
+  @Delete(':maMonAnYeuThich')
+  async remove(@Param('maMonAnYeuThich') maMonAnYeuThich: string, @Res() res: Response) {
+    if (!maMonAnYeuThich) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteOrder = await this.favoriteService.remove(maMonAnYeuThich);
+      res.status(200).json({ success: true, body: deleteOrder });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }

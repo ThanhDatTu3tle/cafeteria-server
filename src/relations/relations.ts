@@ -1,23 +1,33 @@
 const ProductRelations = [
   'maDanhMuc',
-];
+]
 
 const FeedbackRelations = [
-  'maKhachHang',
+  'email',
 ]
 
 const AddressRelations = [
-  'maKhachHang',
+  'email',
 ]
 
 const OrderRelations = [
-  'maKhachHang',
+  'email',
   'maDiaChi',
 ]
 
 const FavoriteRelations = [
-  'maKhachHang',
+  'email',
   'maThucUong',
+]
+
+const FormulaRelations = [
+  'maThucUong',
+  'maNguyenLieu',
+]
+
+const BillRelations = [
+  'maThucUong',
+  'maChiTietDonHang',
 ]
 
 export {
@@ -26,4 +36,6 @@ export {
   AddressRelations,
   OrderRelations,
   FavoriteRelations,
+  FormulaRelations,
+  BillRelations,
 };

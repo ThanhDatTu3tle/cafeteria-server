@@ -2,11 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/
 import { OrderService } from './order.service';
 import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
-// import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 
-@ApiTags('Order')
+@ApiTags('Order - Bảng Chitietdonhang')
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -33,18 +33,58 @@ export class OrderController {
     return this.orderService.getAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.orderService.findOne(+id);
-  // }
+  @Get(':maChiTietDonHang')
+  async findOne(
+    @Param('maChiTietDonHang') maChiTietDonHang: string,
+  ) {
+    return this.orderService.findOne(maChiTietDonHang);
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-  //   return this.orderService.update(+id, updateOrderDto);
-  // }
+  @Get(':email')
+  async findCustomer(@Param('email') email: string) {
+    return this.orderService.findCustomer(email);
+  }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.orderService.remove(+id);
-  // }
+  @Get(':email/:maDiaChi')
+  async findCustomerAndAddress(
+    @Param('email') email: string,
+    @Param('maDiaChi') maDiaChi: string,
+  ) {
+    return this.orderService.findCustomerAndAddress(email, maDiaChi);
+  }
+
+  @Patch(':maChiTietDonHang')
+  async update(
+    @Param('maChiTietDonHang') maChiTietDonHang: string, 
+    @Body() updateOrderDto: UpdateOrderDto,
+    @Res() res: Response,
+  ) {
+    if (!updateOrderDto) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const updateOrder = await this.orderService.update(
+        maChiTietDonHang, 
+        updateOrderDto,
+      );
+      res.status(200).json({ success: true, body: updateOrder });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
+
+  @Delete(':maChiTietDonHang')
+  async remove(@Param('maChiTietDonHang') maChiTietDonHang: string, @Res() res: Response) {
+    if (!maChiTietDonHang) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteOrder = await this.orderService.remove(maChiTietDonHang);
+      res.status(200).json({ success: true, body: deleteOrder });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }

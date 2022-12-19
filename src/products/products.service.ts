@@ -2,7 +2,7 @@ import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductRelations as relations } from 'src/relations/relations';
+import { ProductRelations as relations } from '../../src/relations/relations';
 import { Thucuong as Product } from '../../output/entities/Thucuong';
 import { Danhmuc as Category } from '../../output/entities/Danhmuc';
 import { Repository, getManager } from 'typeorm';
@@ -122,6 +122,17 @@ export class ProductsService {
 
       return findAndReturn;
       // return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async remove(maThucUong: string) {
+    try {
+      const findOne = await this.productRepository.findOneOrFail({
+        where: { maThucUong },
+      });
+      return await this.productRepository.remove(findOne);
     } catch (err) {
       throw err;
     }

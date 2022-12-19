@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
-// import { UpdateOrderDto } from './dto/update-order.dto';
-import { OrderRelations as relations } from 'src/relations/relations';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrderRelations as relations } from '../../src/relations/relations';
 import { Chitietdonhang as Order } from '../../output/entities/Chitietdonhang';
 import { Khachhang as Customer } from '../../output/entities/Khachhang';
 import { Danhsachdiachi as Address } from '../../output/entities/Danhsachdiachi';
@@ -71,15 +71,91 @@ export class OrderService {
     return getAll;
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} order`;
-  // }
+  async findOne(maChiTietDonHang: string) {
+    const findOne = await this.orderRepository.find({ 
+      relations,
+    })
+    const order = await this.orderRepository.find();
 
-  // update(id: number, updateOrderDto: UpdateOrderDto) {
-  //   return `This action updates a #${id} order`;
-  // }
+    return findOne;
+  }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} order`;
-  // }
+  async findCustomer(email: string) {
+    const customer = await this.orderRepository.find({ 
+      relations,
+    })
+    const order = await this.orderRepository.find();
+    const customerOrder = [];
+    console.log(customer)
+    console.log(this.orderRepository)
+
+    for (let i = 0; i < customer.length; i++) {
+
+      const emailCustomer = customer[i].email.email;
+
+      if (emailCustomer === email) {
+        customerOrder.push(customer[i])
+      }
+    }
+
+    return customerOrder;
+  }
+
+  async findCustomerAndAddress(email: string, maDiaChi: string) {
+    const findCustomerAndAddress = await this.orderRepository.find({ 
+      relations,
+    })
+    const order = await this.orderRepository.find();
+    const customerOrder = [];
+    console.log(findCustomerAndAddress)
+    // console.log(this.orderRepository)
+
+    for (let i = 0; i < findCustomerAndAddress.length; i++) {
+
+      const emailCustomer = findCustomerAndAddress[i].email.email;
+
+      if (emailCustomer === email) {
+        customerOrder.push(findCustomerAndAddress[i])
+      }
+    }
+
+    return customerOrder;
+  }
+
+  async update(maChiTietDonHang: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
+    try {
+      const updateOrder = await this.orderRepository.findOneByOrFail({ maChiTietDonHang })
+
+      await this.orderRepository.save({
+        ...updateOrder,
+        gioDat: updateOrderDto.gioDat,
+        ngayDat: updateOrderDto.ngayDat,
+        thanhTien: updateOrderDto.thanhTien,
+        maGiamGia: updateOrderDto.maGiamGia,
+        trangThai: updateOrderDto.trangThai,
+      });
+
+      const findAndReturn = await this.orderRepository.findOneOrFail({
+        relations,
+        where: { 
+          maChiTietDonHang: updateOrder.maChiTietDonHang,
+        },
+      });
+
+      return findAndReturn;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async remove(maChiTietDonHang: string) {
+    try {
+      const findOne = await this.orderRepository.findOneOrFail({
+        where: { maChiTietDonHang },
+      });
+      return await this.orderRepository.remove(findOne);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

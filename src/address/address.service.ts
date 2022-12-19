@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAddressDto } from './dto/create-address.dto';
-// import { UpdateAddressDto } from './dto/update-address.dto';
-import { AddressRelations as relations  } from 'src/relations/relations';
+import { UpdateAddressDto } from './dto/update-address.dto';
+import { AddressRelations as relations  } from '../../src/relations/relations';
 import { Danhsachdiachi as Address } from 'output/entities/Danhsachdiachi';
 import { Khachhang as Customer } from 'output/entities/Khachhang';
 import { Repository, getManager } from 'typeorm';
@@ -53,19 +53,55 @@ export class AddressService {
     return getAll;
   }
 
-  // findAll() {
-  //   return `This action returns all products`;
-  // }
+  async findCustomer(email: string) {
+    const customer = await this.addressRepository.find({ 
+      relations,
+    })
+    const address = await this.addressRepository.find();
+    const customerAddress = [];
+    console.log(customer)
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} product`;
-  // }
+    for (let i = 0; i < customer.length; i++) {
 
-  // update(id: number, updateProductDto: UpdateProductDto) {
-  //   return `This action updates a #${id} product`;
-  // }
+      const emailCustomer = customer[i].email.email;
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} product`;
-  // }
+      if (emailCustomer === email) {
+        customerAddress.push(customer[i])
+      }
+    }
+
+    return customerAddress;
+  }
+
+  async update(maDiaChi: string, updateAddressDto: UpdateAddressDto): Promise<Address> {
+    try {
+      const updateAddress = await this.addressRepository.findOneByOrFail({ maDiaChi })
+
+      await this.addressRepository.save({
+        ...updateAddress,
+        diaChi: updateAddressDto.diaChi,
+        tenDiaChi: updateAddressDto.tenDiaChi,
+      });
+
+      const findAndReturn = await this.addressRepository.findOneOrFail({
+        relations,
+        where: { maDiaChi: updateAddress.maDiaChi },
+      });
+
+      return findAndReturn;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async remove(maDiaChi: string) {
+    try {
+      const findOne = await this.addressRepository.findOneOrFail({
+        where: { maDiaChi },
+      });
+      return await this.addressRepository.remove(findOne);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

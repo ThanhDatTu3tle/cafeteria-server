@@ -6,7 +6,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse } from '@nestjs/swagger';
 
-@ApiTags('Products')
+@ApiTags('Products - Bảng ThucUong')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -60,8 +60,16 @@ export class ProductsController {
     }
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.productsService.remove(+id);
-  // }
+  @Delete(':maThucUong')
+  async remove(@Param('maThucUong') maThucUong: string, @Res() res: Response,) {
+    if (!maThucUong) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteProduct = await this.productsService.remove(maThucUong);
+      res.status(200).json({ success: true, body: deleteProduct });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }

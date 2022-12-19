@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-// import { ProductRelations as relations } from 'src/relations/relations';
+import { ProductRelations as relations } from 'src/relations/relations';
 import { Thucuong as Product } from '../../output/entities/Thucuong';
 import { Danhmuc as Category } from '../../output/entities/Danhmuc';
 import { Repository, getManager } from 'typeorm';
@@ -54,7 +54,14 @@ export class CategoryService {
     }
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} category`;
-  // }
+  async remove(maDanhMuc: string) {
+    try {
+      const findOne = await this.categoryRepository.findOneOrFail({
+        where: { maDanhMuc },
+      });
+      return await this.categoryRepository.remove(findOne);
+    } catch (err) {
+      throw err;
+    }
+  }
 }

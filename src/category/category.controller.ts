@@ -6,7 +6,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Response } from 'express';
 import { ApiTags, ApiQuery, ApiCreatedResponse, ApiBadRequestResponse, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
 
-@ApiTags('category')
+@ApiTags('Category - Bảng DanhMuc')
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -28,7 +28,7 @@ export class CategoryController {
     return this.categoryService.findOne(maDanhMuc);
   }
 
-  @Put(':maDanhMuc')
+  @Patch(':maDanhMuc')
   async update(
     @Param('maDanhMuc') maDanhMuc: string, 
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -50,8 +50,16 @@ export class CategoryController {
     }
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.categoryService.remove(+id);
-  // }
+  @Delete(':maDanhMuc')
+  async remove(@Param('maDanhMuc') maDanhMuc: string, @Res() res: Response,) {
+    if (!maDanhMuc) {
+      res.status(404).json({ success: false, message: 'Gãy!!!' });
+    }
+    try {
+      const deleteProduct = await this.categoryService.remove(maDanhMuc);
+      res.status(200).json({ success: true, body: deleteProduct });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err });
+    }
+  }
 }
